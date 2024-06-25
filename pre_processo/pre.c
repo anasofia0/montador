@@ -29,13 +29,34 @@ void remove_comments(char *line) {
 }
 
 void trim_whitespace(char *line) {
+    // removendo espaços em branco iniciais
     char *start = line;
     while (isspace((unsigned char)*start)) start++;
     memmove(line, start, strlen(start) + 1);
 
+    // removendo espaços em branco finais
     char *end = line + strlen(line) - 1;
     while (end > line && isspace((unsigned char)*end)) end--;
     end[1] = '\0';
+
+    // removendo espaços do meio
+    char *src = line;
+    char *dst = line;
+    int in_space = 0;
+
+    while (*src != '\0') {
+        if (isspace((unsigned char)*src)) {
+            if (!in_space) {
+                *dst++ = ' ';
+                in_space = 1;
+            }
+        } else {
+            *dst++ = *src;
+            in_space = 0;
+        }
+        src++;
+    }
+    *dst = '\0';
 }
 
 
@@ -54,38 +75,6 @@ void process_equ_directive(char *line) {
     }
 }
 
-void process_const_directive(char *line) {
-    char *label = strtok(line, " ");
-    char *directive = strtok(NULL, " ");
-    char *value = strtok(NULL, " ");
-    if (directive && strcmp(directive, "CONST") == 0 && value) {
-        // armazena o rótulo sem ':'
-        char label_no_colon[MAX_LABEL_LENGTH];
-        strncpy(label_no_colon, label, strlen(label) - 1);
-        label_no_colon[strlen(label) - 1] = '\0';
-        strcpy(constants[constant_count].label, label_no_colon);
-        strcpy(constants[constant_count].value, value);
-        constant_count++;
-        // troca o CONST pelo seu valor
-        sprintf(line, "%s %s", label, value);
-    }
-}
-
-void process_space_directive(char *line) {
-    char *label = strtok(line, " ");
-    char *directive = strtok(NULL, " ");
-    if (directive && strcmp(directive, "SPACE") == 0) {
-        // armazena o rótulo sem ':'
-        char label_no_colon[MAX_LABEL_LENGTH];
-        strncpy(label_no_colon, label, strlen(label) - 1);
-        label_no_colon[strlen(label) - 1] = '\0';
-        strcpy(constants[constant_count].label, label_no_colon);
-        strcpy(constants[constant_count].value, "00");
-        constant_count++;
-        
-        sprintf(line, "%s 00", label);
-    }
-}
 
 void replace_constants(char *line) {
     for (int i = 0; i < constant_count; i++) {
@@ -183,16 +172,6 @@ void preprocess_file(const char *input_filename, const char *output_filename) {
         if (skip_next_line) {
             lines[i][0] = '\0'; 
             skip_next_line = 0;
-            continue;
-        }
-
-        if (strstr(lines[i], "CONST")) {
-            process_const_directive(lines[i]);
-            continue;
-        }
-
-        if (strstr(lines[i], "SPACE")) {
-            process_space_directive(lines[i]);
             continue;
         }
     }
