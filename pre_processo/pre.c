@@ -177,7 +177,7 @@ void preprocess_file(const char *input_filename, const char *output_filename) {
     }
 
     //substituir todos os rótulos
-    for (int i = 0; i < stop_line_index; i++) {
+    for (int i = 0; i < line_count; i++) {
             replace_constants(lines[i]);
         }
 
