@@ -153,9 +153,11 @@ std::map<std::string, std::string> parser(std::string line) {
     }
  
     // check if type of argument is correct
+    const std::regex re_number ("^[0-9]+$");
+    std::string arg1 = syntax_tree["arg1"];
     if (req_args != 0) {
-        if ((syntax_tree["inst"] == "CONST" && !std::isdigit(syntax_tree["arg1"])) ||
-            (syntax_tree["inst"] != "CONST" && (std::isdigit(syntax_tree["arg1"]) || syntax_tree["arg2"]))) {
+        if ((inst == "CONST" && !std::regex_search(arg1, re_number)) ||
+            (inst != "CONST" && std::regex_search(arg1, re_number))) {
             throw std::runtime_error("Syntax error: wrong type of argument");
         }
     }
