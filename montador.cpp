@@ -140,7 +140,7 @@ std::map<std::string, std::string> parser(std::string line) {
         throw std::runtime_error("Syntax error: invalid instruction");
     }
 
-    // Check if number and type of arguments if correct
+    // Check if number of arguments if correct
     int req_args;
     if (instruction_table.count(inst)) {
         req_args = argument_table[inst];
@@ -151,10 +151,19 @@ std::map<std::string, std::string> parser(std::string line) {
     if (req_args != arg_count) {
         throw std::runtime_error("Syntax error: invalid number of arguments");
     }
+ 
+    // check if type of argument is correct
+    if (req_args != 0) {
+        if ((syntax_tree["inst"] == "CONST" && !std::isdigit(syntax_tree["arg1"])) ||
+            (syntax_tree["inst"] != "CONST" && (std::isdigit(syntax_tree["arg1"]) || syntax_tree["arg2"]))) {
+            throw std::runtime_error("Syntax error: wrong type of argument");
+        }
+    }
 
-    // check if extern instruction has label
-    if (syntax_tree["inst"] == "EXTERN" && syntax_tree["label"].empty()) {
-        throw std::runtime_error("Syntax error: missing label for extern directive");
+    // check if extern and space directives have label
+    if ((syntax_tree["inst"] == "EXTERN" && syntax_tree["label"].empty()) 
+        || (syntax_tree["inst"] == "SPACE" && syntax_tree["label"].empty())) {
+        throw std::runtime_error("Syntax error: missing label for directive");
     }
     
     return syntax_tree;
@@ -325,6 +334,7 @@ std::string single_pass_assembler(std::vector<std::string> code) {
                     real_bitmask.push_back(1);
                 } else {
                     // add to pending list
+                    object_file.push_back(-1);
                     pending_list[arg_val].push_back(location_count);
                 }
                 location_count++;
