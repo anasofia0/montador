@@ -554,43 +554,6 @@ std::string single_pass_assembler(std::vector<std::string> code) {
     return formatted_obj;
 }
 
-/*int main(int argc, char* argv[]) {
-
-    std::string line;
-    std::vector<std::string> code;
-    std::ifstream source (argv[1]);
-    
-    if (source.is_open()) {
-        while (getline(source, line)) {
-            code.push_back(line);
-        }
-        source.close();
-
-        std::string object_file = single_pass_assembler(code);
-        std::cout << object_file << "\n";
-    } else {
-        std::cout << "Fail to open file\n";
-    }
-
-    return 0;
-}
-
-int main(int argc, char *argv[]) {
-    if (argc != 3 || strcmp(argv[1], "-p") != 0) {
-        fprintf(stderr, "Usage: %s -p <myfile.asm>\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    const char *input_filename = argv[2];
-    char output_filename[FILENAME_MAX];
-
-    // saida
-    snprintf(output_filename, sizeof(output_filename), "%.*s.pre", (int)(strrchr(input_filename, '.') - input_filename), input_filename);
-
-    preprocess_file(input_filename, output_filename);
-    return EXIT_SUCCESS;
-}*/
-
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " -p <inputfile.asm> | -o <inputfile.pre>\n";
