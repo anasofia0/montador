@@ -396,7 +396,7 @@ std::string format_object_file(std::vector<int> object_file,
 
         aux_string = "";
         object_text += "REAL\n";
-        if (!def_table.empty()) {
+        if (!real_bitmask.empty()) {
             for (int i : real_bitmask) {
                 aux_string += std::to_string(i);
             }
@@ -431,6 +431,7 @@ std::string single_pass_assembler(std::vector<std::string> code) {
     // single_pass
     for (auto line : code) {
         line_counter++;
+        std::cout << location_count << " "+line+"\n";
         float check_inst = true; // not necessary with extern
         float check_args = true; // not necessary with const and public
         float increase_loc_count = true; // flag used only in instruction check
@@ -443,9 +444,20 @@ std::string single_pass_assembler(std::vector<std::string> code) {
             throw std::runtime_error(error_message);
         }
 
-        // check if there is a label
+        // check if there is a label and if it is public
         std::string label = parsed_line["label"];
-        if (!label.empty()) {
+        std::string inst = parsed_line["inst"];
+        if (!label.empty() && inst == "PUBLIC") {
+            // if label is public, add to def table
+            // check if is already in symbol table
+            if (symbol_table.count(label)) {
+                def_table[label] = symbol_table[label];
+            } else {
+                // add as pending
+                def_table[label] = -1;
+            }
+            check_inst = false;
+        } else if (!label.empty()) {
             // check if label already exists in symbol table
             if (symbol_table.count(label)) {
                 std::string error_message = "Error in line "+std::to_string(line_counter)+": Semantic error: Label "+label+"already declared\n";
@@ -468,6 +480,7 @@ std::string single_pass_assembler(std::vector<std::string> code) {
             
             // check if label is in pending list
             if (pending_list.count(label)) {
+                // if extern
                 if (symbol_table[label] == -1) {
                     for (int id : pending_list[label]) {
                         use_table[label].push_back(id);
@@ -484,7 +497,6 @@ std::string single_pass_assembler(std::vector<std::string> code) {
         if (!check_inst) continue;
 
         // check which instruction/directive
-        std::string inst = parsed_line["inst"];
         if (!inst.empty()) {
             if (instruction_table.count(inst)) {
                 object_file.push_back(instruction_table[inst]);
@@ -497,20 +509,12 @@ std::string single_pass_assembler(std::vector<std::string> code) {
                 } else if (inst == "SPACE") {
                     object_file.push_back(0);
                     real_bitmask.push_back(0);
-                } else if (inst == "PUBLIC") {
-                    increase_loc_count = false;
-                    check_args = false;
-                    // check if label is already defined
-                    std::string public_label = parsed_line["arg1"];
-                    if (symbol_table.count(public_label)) {
-                        def_table[public_label] = symbol_table[public_label];
-                    } else {
-                        def_table[public_label] = -1;
-                    }
                 } else if (inst == "BEGIN") {
                     module = true;
+                    increase_loc_count = false;
                 } else if (inst == "END") {
                     end_module = true;
+                    increase_loc_count = false;
                 }
             }
             if (increase_loc_count) location_count++;
@@ -523,16 +527,21 @@ std::string single_pass_assembler(std::vector<std::string> code) {
         for (std::string arg : arg_list) {
             std::string arg_val = parsed_line[arg];
             if (!arg_val.empty()) {
-                // check if label is in symbol_table
                 if (symbol_table.count(arg_val)) {
-                    object_file.push_back(symbol_table[arg_val]);
-                    real_bitmask.push_back(1);
+                    // check if extern
+                    if (symbol_table[arg_val] == -1) {
+                        object_file.push_back(0);
+                        use_table[arg_val].push_back(location_count);
+                    } else {
+                        object_file.push_back(symbol_table[arg_val]);
+                    }
                 } else {
                     // add to pending list
                     object_file.push_back(-1);
                     pending_list[arg_val].push_back(location_count);
                 }
                 location_count++;
+                real_bitmask.push_back(1);
             }
         }
     }
