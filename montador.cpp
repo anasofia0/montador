@@ -447,17 +447,7 @@ std::string single_pass_assembler(std::vector<std::string> code) {
         // check if there is a label and if it is public
         std::string label = parsed_line["label"];
         std::string inst = parsed_line["inst"];
-        if (!label.empty() && inst == "PUBLIC") {
-            // if label is public, add to def table
-            // check if is already in symbol table
-            if (symbol_table.count(label)) {
-                def_table[label] = symbol_table[label];
-            } else {
-                // add as pending
-                def_table[label] = -1;
-            }
-            check_inst = false;
-        } else if (!label.empty()) {
+        if (!label.empty()) {
             // check if label already exists in symbol table
             if (symbol_table.count(label)) {
                 std::string error_message = "Error in line "+std::to_string(line_counter)+": Semantic error: Label "+label+"already declared\n";
@@ -512,6 +502,17 @@ std::string single_pass_assembler(std::vector<std::string> code) {
                 } else if (inst == "BEGIN") {
                     module = true;
                     increase_loc_count = false;
+                } else if (inst == "PUBLIC") {
+                    increase_loc_count = false;
+                    check_args = false;
+                    // check if label is already defined, if it isnt add as pending
+                    std::string public_label = parsed_line["arg1"];
+                    if (symbol_table.count(public_label)) {
+                        def_table[public_label] = symbol_table[public_label];
+                    } else {
+                        // peding in def table
+                        def_table[public_label] = -1;
+                    }
                 } else if (inst == "END") {
                     end_module = true;
                     increase_loc_count = false;
