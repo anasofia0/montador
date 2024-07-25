@@ -23,7 +23,7 @@ Para compilar o programa, utilize o `Makefile` fornecido. Certifique-se de estar
     ./montador -o seu_arquivo.pre
 
 ### Ligador
-1. Para ligar múltiplos arquivos objeto (.obj) e gerar um arquivo executável (.exc):
+1. Para ligar múltiplos arquivos objeto (.obj) e gerar um arquivo executável (.e):
     ./ligador arquivo1.obj arquivo2.obj
 
 
