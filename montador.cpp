@@ -431,7 +431,6 @@ std::string single_pass_assembler(std::vector<std::string> code) {
     // single_pass
     for (auto line : code) {
         line_counter++;
-        std::cout << location_count << " "+line+"\n";
         float check_inst = true; // not necessary with extern
         float check_args = true; // not necessary with const and public
         float increase_loc_count = true; // flag used only in instruction check
