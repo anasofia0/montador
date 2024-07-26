@@ -1,4 +1,4 @@
-# Montador
+ # Montador
 Trabalho 1 para a disciplina de Software Básico. Consiste na implementação em C/C++ de um montador e ligador do assembly inventado visto em sala de aula.
 
 ## Alunos
@@ -17,14 +17,14 @@ Para compilar o programa, utilize o `Makefile` fornecido. Certifique-se de estar
 
 ### Pré-processador e Montador
 1. Para gerar um arquivo pré-processado (.pre) a partir de um arquivo de montagem (.asm):
-    ./montador -p seu_arquivo.asm
+    `./montador -p seu_arquivo.asm`
 
-2. Para gerar um arquivo objeto (.obj) a partir de um arquivo pré-processado (.pre):
-    ./montador -o seu_arquivo.pre
+3. Para gerar um arquivo objeto (.obj) a partir de um arquivo pré-processado (.pre):
+    `./montador -o seu_arquivo.pre`
 
 ### Ligador
 1. Para ligar múltiplos arquivos objeto (.obj) e gerar um arquivo executável (.e):
-    ./ligador arquivo1.obj arquivo2.obj
+    `./ligador arquivo1.obj arquivo2.obj`
 
 
     O resultado será um arquivo chamado `arquivo1.e`.
